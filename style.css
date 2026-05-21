@@ -1,0 +1,780 @@
+/* ========================================= */
+/* CORE VARIABLES — DEEP CANVAS PALETTE      */
+/* ========================================= */
+:root {
+  --text-primary: #E8E4DC;
+  --text-secondary: #9E9A93;
+  --text-muted: #5E5C58;
+  --accent-bronze: #B8975A;
+  --accent-bronze-soft: rgba(184, 151, 90, 0.18);
+  --accent-warm: #D4B47A;
+  --border-soft: rgba(232, 228, 220, 0.06);
+  --border-hover: rgba(184, 151, 90, 0.18);
+  --font-display: 'Cormorant Garamond', 'Georgia', serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --ease-smooth: cubic-bezier(0.45, 0, 0.25, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-slow: 1.4s var(--ease-smooth);
+  --t-med: 0.8s var(--ease-smooth);
+  --t-fast: 0.4s var(--ease-smooth);
+
+  /* DAS DUNKLE KUNSTWERK (Permanenter Fluss im Hintergrund) */
+  background: linear-gradient(
+    135deg, 
+    #050801 0%,   /* Fast schwarzes Tiefgrün */
+    #0B130A 25%,  /* Dunkles Moos/Tannengrün */
+    #1C2A18 50%,  /* Tiefes Olivengrün */
+    #0D161B 75%,  /* Rauchiges Schiefer-Nachtblau */
+    #221A0F 100%  /* Dunkles Umbra / Erdbraun */
+  );
+  background-size: 400% 400%;
+  animation: liquidArt 16s ease infinite; /* Sanfte, nächtliche Bewegung */
+}
+
+/* ============================================ */
+/* THE NATURAL ARTWORK MODE (EARTHY GREEN)      */
+/* ============================================ */
+body.light-mode {
+  --text-primary: #1C2318;    /* Sehr dunkles, edles Moosgrün */
+  --text-secondary: #3D4A36;  /* Gedämpftes Olivengrün für Untertexte */
+  --text-muted: #707A69;
+  --bg-mid: rgba(255, 255, 255, 0.35);
+  --border-soft: rgba(28, 35, 24, 0.1);
+  
+  /* Das flüssige Kunstwerk aus Bastelfarben */
+  background: linear-gradient(
+    135deg, 
+    #F4F1EA 0%,   /* Naturweiß / Leinen */
+    #D1D7C4 25%,  /* Softes Salbeigrün */
+    #A3B18A 50%,  /* Klassisches Olivengrün */
+    #588157 75%,  /* Satte, matte Wald-Bastelfarbe */
+    #E9C46A 100%  /* Ein warmer Klecks Senf/Ocker für den Kontrast */
+  );
+  background-size: 400% 400%;
+  animation: liquidArt 14s ease infinite;
+  color: var(--text-primary);
+}
+
+@keyframes liquidArt {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 3D-Glasanpassung speziell für das Licht des Light-Modes (Nicht für die Galerie!) */
+body.light-mode .main-header,
+body.light-mode .view-section {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(25px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  
+  border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+  border-right: 1px solid rgba(28, 35, 24, 0.1) !important;
+  border-bottom: 1px solid rgba(28, 35, 24, 0.15) !important;
+  box-shadow: 0 20px 50px rgba(28, 35, 24, 0.05) !important;
+}
+
+body.light-mode .about-lead {
+  color: var(--accent-bronze);
+}
+
+body.light-mode .about-image-wrapper {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================ */
+/* GSAP FARBEXPLOSIONS-ELEMENT (NATURAL RIPPLE) */
+/* ============================================ */
+.art-ripple {
+  position: fixed;
+  background: radial-gradient(
+    circle, 
+    rgba(163, 177, 138, 0.95) 0%,   /* Intensives Olivengrün im Kern */
+    rgba(209, 215, 196, 0.7) 40%,   /* Sanftes Salbeigrün bricht aus */
+    rgba(244, 241, 234, 0) 70%      /* Verläuft weich im Raum */
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  will-change: transform, width, height, opacity;
+}
+
+/* ========================================= */
+/* BASE STYLES                               */
+/* ========================================= */
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html { 
+  scroll-behavior: smooth; 
+  background-color: transparent; 
+  color: var(--text-primary); 
+}
+
+body {
+  font-family: var(--font-body);
+  min-height: 100vh;
+  line-height: 1.9;
+  overflow-x: hidden;
+  font-weight: 300;
+  font-size: 18px;
+  background: transparent; 
+  transition: color 0.5s ease;
+}
+
+::selection { 
+  background: var(--accent-bronze-soft); 
+  color: var(--accent-warm); 
+}
+
+/* =================================================== */
+/* ATMOSPHERIC BACKGROUND (3D GLASS-BUBBLES IN BACK)  */
+/* =================================================== */
+.glow-bg-container { 
+  position: fixed; 
+  inset: 0; 
+  z-index: -1; 
+  pointer-events: none; 
+  overflow: hidden; 
+}
+
+.glow-bg { 
+  position: absolute; 
+  border-radius: 50%; 
+  pointer-events: none; 
+  transition: opacity 0.6s ease;
+  will-change: transform, opacity;
+}
+
+/* BLASEN IM DUNKELMODUS */
+.glow-1 {
+  bottom: -20%; left: 10%; width: 350px; height: 350px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 40%, rgba(0, 0, 0, 0.4) 80%);
+  box-shadow: 
+    inset -10px -10px 25px rgba(0, 0, 0, 0.6),
+    inset 10px 10px 20px rgba(255, 255, 255, 0.2),
+    0 20px 40px rgba(0, 0, 0, 0.5);
+  animation: floatBubbleUp 28s ease-in-out infinite alternate;
+}
+
+.glow-2 {
+  bottom: -40%; right: 15%; width: 500px; height: 500px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(0, 0, 0, 0.5) 90%);
+  box-shadow: 
+    inset -15px -15px 35px rgba(0, 0, 0, 0.7),
+    inset 15px 15px 25px rgba(255, 255, 255, 0.15),
+    0 30px 60px rgba(0, 0, 0, 0.6);
+  animation: floatBubbleUp 36s ease-in-out infinite alternate-reverse;
+}
+
+.glow-3 {
+  top: 20%; left: 40%; width: 200px; height: 200px;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.01) 60%, rgba(0, 0, 0, 0.4) 100%);
+  box-shadow: 
+    inset -5px -5px 15px rgba(0, 0, 0, 0.5),
+    inset 5px 5px 12px rgba(255, 255, 255, 0.25),
+    0 15px 30px rgba(0, 0, 0, 0.4);
+  animation: floatBubbleUp 22s ease-in-out infinite alternate;
+  animation-delay: -5s;
+}
+
+.glow-4 {
+  bottom: 10%; right: 45%; width: 150px; height: 150px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(0, 0, 0, 0.5) 100%);
+  box-shadow: 
+    inset -4px -4px 12px rgba(0, 0, 0, 0.5),
+    inset 4px 4px 10px rgba(255, 255, 255, 0.3),
+    0 10px 20px rgba(0, 0, 0, 0.3);
+  animation: floatBubbleUp 18s ease-in-out infinite alternate;
+  animation-delay: -12s;
+}
+
+@keyframes floatBubbleUp { 
+  0% { transform: translate(0, 100px) scale(0.9); opacity: 0.3; } 
+  50% { opacity: 0.6; }
+  100% { transform: translate(5vw, -150px) scale(1.05); opacity: 0.4; } 
+}
+
+/* BLASEN FÜR DEN HELLMODUS SIND HIER EBENFALLS AKTIV */
+body.light-mode .glow-bg {
+  opacity: 1 !important;
+}
+body.light-mode .glow-1, 
+body.light-mode .glow-2, 
+body.light-mode .glow-3, 
+body.light-mode .glow-4 {
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(28, 35, 24, 0.05) 70%) !important;
+  box-shadow: 
+    inset -8px -8px 20px rgba(28, 35, 24, 0.15),
+    inset 8px 8px 15px rgba(255, 255, 255, 0.8),
+    0 15px 35px rgba(28, 35, 24, 0.06) !important;
+}
+
+/* ========================================= */
+/* ANIMATIONS & REVEALS                      */
+/* ========================================= */
+.page-reveal { 
+  animation: pageIn 2.2s var(--ease-out) both; 
+}
+
+@keyframes pageIn { 
+  from { opacity: 0; transform: translateY(24px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+
+.scroll-reveal { 
+  opacity: 0; 
+  transform: translateY(36px); 
+  transition: opacity var(--t-slow), transform var(--t-slow); 
+}
+
+.scroll-reveal-item { 
+  opacity: 0; 
+  transform: translateY(24px); 
+  transition: opacity var(--t-med), transform var(--t-med); 
+}
+
+.revealed { 
+  opacity: 1; 
+  transform: translateY(0); 
+}
+
+.hero-section { 
+  animation: heroReveal 1.2s var(--ease-out) both; 
+}
+
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================================= */
+/* HEADER & NAVIGATION (PLASTISCHES GLAS MIT LICHTREFLEKTION)*/
+/* ========================================================= */
+.main-header {
+  width: 100%;
+  padding: 20rem 5vw 7rem; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14rem;
+  position: relative;
+  z-index: 100;
+
+  backdrop-filter: blur(30px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(130%) !important;
+  background: rgba(255, 255, 255, 0.02) !important; 
+  
+  /* FLÜSSIGE LICHTKANTE: Bricht das Licht edel beim Scrollen */
+  border-top: 2px solid rgba(255, 255, 255, 0.4) !important;
+  border-left: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.25) !important;
+  border-bottom: 2.5px solid rgba(0, 0, 0, 0.5) !important;
+  
+  /* Weicher, raumgreifender Schatten */
+  box-shadow: 
+    0 30px 70px rgba(5, 8, 1, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.main-header::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: transparent;
+  box-shadow: 0 0 20px 4px rgba(184, 151, 90, 0.2); 
+  animation: pulseGlow 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.1; } 
+  50% { opacity: 0.4; }      
+}
+
+body.light-mode .main-header::after {
+  animation: none !important;
+  opacity: 0 !important;
+  transition: opacity 0.5s ease;
+}
+
+.logo-wrapper {
+  width: 100%;
+  max-width: 1000px; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.96;
+  transition: opacity var(--t-fast), transform var(--t-fast);
+}
+
+.logo-wrapper:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.logo {
+  width: 100%; 
+  height: auto; 
+  display: block;
+  filter: brightness(1.02); 
+}
+
+.signature-line {
+  fill: transparent;
+  will-change: stroke-dashoffset, fill;
+  transform-origin: center;
+}
+
+.main-nav { 
+  margin-top: 20px;
+  display: flex; 
+  flex-direction: column; 
+  align-items: center;
+  gap: 1.2rem; 
+  width: min(100%, 700px); 
+}
+
+.nav-links { 
+  list-style: none; 
+  display: flex; 
+  gap: 3.5rem; 
+  flex-wrap: wrap; 
+  justify-content: center; 
+}
+
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.30em;
+  font-weight: 400;
+  padding-bottom: 10px;
+  position: relative;
+  transition: color var(--t-fast), letter-spacing var(--t-fast);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute; bottom: 0; left: 50%;
+  width: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent-bronze) 40%, var(--accent-warm) 60%, transparent 100%);
+  transition: width 0.6s var(--ease-out), left 0.6s var(--ease-out), opacity var(--t-fast);
+  opacity: 0;
+}
+
+.nav-link:hover { color: var(--accent-warm); letter-spacing: 0.38em; }
+.nav-link:hover::after { width: 100%; left: 0; opacity: 1; }
+
+/* WECHSEL-BUTTON: DEIN SCHÖNER ORIGINAL-FARBVERLAUF MIT SANFTEM 3D-EFFEKT */
+.theme-toggle {
+  background: linear-gradient(135deg, #A3B18A, #D1D7C4) !important;
+  border: none !important;
+  color: #1C2318 !important;
+  padding: 12px 28px;
+  border-radius: 40px;
+  cursor: pointer;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  /* Feine, glänzende Lichtkante oben, die den Button konvex hervorhebt */
+  border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  border-left: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+  
+  /* Eleganter Schatten, der ihn über dem Header schweben lässt */
+  box-shadow: 
+    0 10px 25px rgba(163, 177, 138, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+    
+  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  margin-top: 1.5rem;
+}
+
+/* BUTTON HOVER: Drückt sich sanft konkav ein, schimmert aber seidenmatt auf */
+.theme-toggle:hover {
+  transform: scale(1.03) translateY(-2px);
+  
+  /* Licht bricht sich an den Kanten umgekehrt (konkave Mulde) */
+  border-top: 1.5px solid rgba(0, 0, 0, 0.15) !important;
+  border-left: 1.5px solid rgba(0, 0, 0, 0.1) !important;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  
+  /* REPARIERT & UPGRADED: Minimal aufgehellter Originalverlauf für feinen Innenglanz */
+  background: linear-gradient(135deg, #b3c29a, #dedfc8) !important;
+  
+  /* Edler Innenschatten für perfekte Plastizität */
+  box-shadow: 
+    0 15px 30px rgba(163, 177, 138, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* HELLMODUS ANPASSUNG FÜR HEADER UND BUTTON */
+body.light-mode .main-header {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-top: 2px solid rgba(255, 255, 255, 0.7) !important;
+  border-left: 2px solid rgba(255, 255, 255, 0.5) !important;
+  border-right: 1.5px solid rgba(28, 35, 24, 0.15) !important;
+  border-bottom: 1.5px solid rgba(28, 35, 24, 0.25) !important;
+  box-shadow: 0 20px 50px rgba(28, 35, 24, 0.06) !important;
+}
+
+body.light-mode .theme-toggle {
+  background: rgba(255, 255, 255, 0.4) !important;
+  color: var(--text-primary);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.7) !important;
+  border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+  border-right: 1px solid rgba(28, 35, 24, 0.15) !important;
+  border-bottom: 1px solid rgba(28, 35, 24, 0.25) !important;
+  box-shadow: 0 8px 20px rgba(28, 35, 24, 0.05) !important;
+}
+
+body.light-mode .theme-toggle:hover {
+  background: rgba(28, 35, 24, 0.05) !important;
+  border-top: 1px solid rgba(28, 35, 24, 0.2) !important;
+  border-left: 1px solid rgba(28, 35, 24, 0.15) !important;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: inset 0 6px 12px rgba(28, 35, 24, 0.08) !important;
+}
+
+/* ========================================= */
+/* HERO & CONTENT GRID                       */
+/* ========================================= */
+.hero-spacer-section { padding: 2rem 0 0; display: flex; justify-content: center; }
+.hero-line {
+  height: 1px; width: 100px;
+  background: linear-gradient(90deg, transparent 0%, rgba(184,151,90,0.35) 30%, rgba(212,180,122,0.55) 50%, rgba(184,151,90,0.35) 70%, transparent 100%);
+}
+
+.hero-section { display: flex; flex-direction: column; align-items: center; gap: 2.5rem; text-align: center; padding: 4rem 0 2rem; }
+.hero-label { display: block; font-family: var(--font-body); font-size: 0.80rem; text-transform: uppercase; letter-spacing: 0.45em; color: var(--accent-bronze); font-weight: 400; opacity: 0.8; }
+.hero-title { 
+  font-family: var(--font-display); 
+  font-size: clamp(2.2rem, 4.5vw, 3.8rem); 
+  font-weight: 300; 
+  letter-spacing: 0.04em; 
+  color: var(--text-primary); 
+  line-height: 1.25; 
+  max-width: 100%; 
+  font-style: italic; 
+}
+.hero-copy { font-family: var(--font-body); font-size: 1.1rem; font-weight: 300; color: var(--text-secondary); letter-spacing: 0.10em; max-width: 480px; line-height: 1.9; }
+
+.content-wrapper { max-width: 1680px; margin: 0 auto; padding: 7rem 5vw 8rem; display: grid; gap: 8rem; position: relative; }
+
+/* SECTION HEADERS */
+.portfolio-section { margin-bottom: 0; opacity: 1 !important; transform: translateY(0) !important; }
+.section-header { text-align: center; margin-bottom: 5rem; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+.section-title-group { position: relative; display: inline-flex; flex-direction: column; align-items: center; padding-bottom: 22px; gap: 0.6rem; }
+.section-title-group::after {
+  content: ''; position: absolute; bottom: 0; left: 20%; width: 60%; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(184,151,90,0.25) 20%, rgba(212,180,122,0.55) 50%, rgba(184,151,90,0.25) 80%, transparent 100%);
+}
+.section-number { font-family: var(--font-body); font-size: 0.75rem; font-weight: 300; color: var(--text-muted); letter-spacing: 0.65em; text-transform: uppercase; }
+.section-title { font-family: var(--font-body); font-size: clamp(1.2rem, 1.8vw, 1.4rem); font-weight: 300; letter-spacing: 0.48em; text-transform: uppercase; color: var(--text-secondary); }
+.section-subtitle { font-family: var(--font-display); max-width: 500px; font-size: 1.25rem; font-weight: 300; color: var(--text-muted); letter-spacing: 0.06em; font-style: italic; line-height: 1.85; }
+
+/* =================================================== */
+/* GALLERY GRID (ARTWORKS ABSOLUTELY PROTECTED & PURE) */
+/* =================================================== */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 3.5rem; }
+
+.gallery-grid .gallery-item {
+  flex: 0 0 60vw !important; 
+  scroll-snap-align: center;
+}
+
+.gallery-item {
+  position: relative; 
+  overflow: hidden; 
+  cursor: pointer;
+  aspect-ratio: 16 / 10;
+  border-radius: 16px;
+  
+  /* Keine Filter oder Effekte auf der Karte */
+  background: transparent !important; 
+  border: none !important;            
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  
+  /* UPGRADED: Mehrschichtiger, extrem tiefer Soft-Blend-Edelschatten */
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.12),
+    0 25px 50px rgba(0, 0, 0, 0.18) !important;
+    
+  transition: transform var(--t-slow), box-shadow var(--t-slow);
+}
+
+/* DIE BILDER BLEIBEN HIER UND BEIM HOVER KOMPLETT FARBECHT UND UNBERÜHRT */
+.gallery-item img {
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover;
+  
+  /* Alle verfälschenden Filter wurden entfernt */
+  filter: none !important; 
+  -webkit-filter: none !important;
+  
+  transition: transform var(--t-slow) var(--ease-out);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* Beim Hovern hebt sich das Kunstwerk majestätisch wie eine echte Leinwand an */
+.gallery-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 
+    0 20px 30px rgba(0, 0, 0, 0.2),
+    0 40px 80px rgba(0, 0, 0, 0.35) !important;
+}
+
+.gallery-item:hover img {
+  transform: scale(1.03); 
+  filter: none !important; 
+}
+
+.gallery-item:hover .overlay { opacity: 1; }
+.gallery-item:hover .overlay-content { transform: translateY(0); }
+
+.overlay {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, rgba(8,11,16,0.10) 0%, rgba(8,11,16,0.55) 60%, rgba(8,11,16,0.72) 100%);
+  display: flex; justify-content: center; align-items: center;
+  opacity: 0; transition: opacity 0.7s var(--ease-smooth);
+  z-index: 2; padding: 2.5rem;
+}
+.overlay-content { text-align: center; transform: translateY(16px); transition: transform 0.9s var(--ease-out); }
+.item-category { display: block; font-family: var(--font-body); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.55em; color: var(--accent-bronze); margin-bottom: 0.75rem; font-weight: 400; }
+.item-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 300; letter-spacing: 0.12em; color: var(--text-primary); font-style: italic; }
+
+/* ========================================= */
+/* ABOUT ME (ÜBER MICH)                      */
+/* ========================================= */
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 5rem;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+.about-content { order: 2; }
+.about-lead {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  color: var(--accent-warm);
+  font-style: italic;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  letter-spacing: 0.02em;
+}
+
+.about-content p {
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 2.1;
+  margin-bottom: 1.8rem;
+  letter-spacing: 0.03em;
+  text-align: justify;
+}
+
+.about-image-wrapper {
+  order: 1;
+  position: relative;
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 0 20px rgba(184, 151, 90, 0.1);
+  border-radius: 22px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.about-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 4 / 5;
+  transition: transform 0.8s var(--ease-smooth);
+}
+
+/* ========================================= */
+/* CONTACT FORM                              */
+/* ========================================= */
+.contact-form { display: flex; flex-direction: column; gap: 2.5rem; width: 100%; }
+.form-group { display: flex; flex-direction: column; gap: 0.8rem; }
+.form-group label {
+  font-family: var(--font-body); font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.2em;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-soft);
+  padding: 1.2rem;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  border-radius: 12px;
+  transition: border-color var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-warm);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 15px rgba(212, 180, 122, 0.15);
+}
+
+.submit-btn {
+  align-self: center;
+  background: transparent;
+  color: var(--accent-warm);
+  border: 1px solid var(--accent-warm);
+  padding: 1.2rem 3.5rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  cursor: pointer;
+  border-radius: 40px;
+  transition: all var(--t-fast);
+  margin-top: 1rem;
+}
+
+.submit-btn:hover {
+  background: var(--accent-warm);
+  color: #050801;
+  box-shadow: 0 0 25px rgba(212, 180, 122, 0.4);
+  transform: translateY(-3px);
+}
+
+body.light-mode .form-group input,
+body.light-mode .form-group textarea {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: var(--text-primary);
+}
+
+body.light-mode .form-group input:focus,
+body.light-mode .form-group textarea:focus {
+  border-color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================ */
+/* LIGHTBOX (MODAL)                             */
+/* ============================================ */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  background: rgba(8, 11, 16, 0.95);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity var(--t-med);
+}
+
+.modal.active { display: flex; justify-content: center; align-items: center; opacity: 1; }
+.modal-content { position: relative; max-width: 90vw; max-height: 85vh; transform: scale(0.95); transition: transform var(--t-med); }
+.modal.active .modal-content { transform: scale(1); }
+
+.modal-content img {
+  width: auto;
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 12px;
+  object-fit: contain;
+  border: 2px solid rgba(212, 180, 122, 0.8) !important;
+  box-shadow: 0 0 60px rgba(212, 180, 122, 0.4), 0 0 100px rgba(184, 151, 90, 0.2) !important;
+}
+
+.close-modal {
+  position: absolute; top: 40px; right: 5vw;
+  color: var(--text-primary); font-size: 3rem; font-weight: 300;
+  cursor: pointer; transition: color var(--t-fast); z-index: 2001; line-height: 1;
+}
+.close-modal:hover { color: var(--accent-warm); }
+
+#modal-caption {
+  text-align: center; color: var(--accent-bronze); margin-top: 1.5rem;
+  font-family: var(--font-display); font-size: 1.25rem; letter-spacing: 0.12em; font-style: italic;
+}
+
+/* ========================================= */
+/* FOOTER & VIEW MANAGEMENT                  */
+/* ========================================= */
+.view-section { display: none; opacity: 0; }
+.view-section.active { display: block; opacity: 1; }
+
+.main-footer { 
+  text-align: center; 
+  padding: 8rem 2rem 5rem; 
+  position: relative; 
+  
+  /* Feine, unaufdringliche Trennlinie nach oben */
+  border-top: 1px solid var(--border-soft); 
+}
+
+/* Subtiler, gold-bronzener Schimmer, der von oben in den Footer fließt */
+.main-footer::before {
+  content: ''; 
+  position: absolute; 
+  inset: 0;
+  background: radial-gradient(ellipse at top center, rgba(184, 151, 90, 0.03) 0%, transparent 60%);
+  pointer-events: none; 
+  z-index: -1;
+}
+
+.footer-content { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 1.5rem; 
+}
+
+/* Elegante Zentrierungs-Linie */
+.footer-line { 
+  height: 1px; 
+  width: 60px; 
+  background: linear-gradient(90deg, transparent 0%, rgba(184, 151, 90, 0.4) 50%, transparent 100%); 
+}
+
+/* Dein Name im edlen Kunst-Stil (Serifenschrift) */
+.footer-credits { 
+  font-family: var(--font-display); 
+  font-size: 1.15rem; 
+  color: var(--text-secondary); 
+  font-weight: 300; 
+  font-style: italic; 
+  letter-spacing: 0.08em; 
+}
+
+/* Der offizielle Copyright-Hinweis */
+.footer-copyright { 
+  font-family: var(--font-body); 
+  font-size: 0.75rem; 
+  color: var(--text-muted); 
+  letter-spacing: 0.25em; 
+  text-transform: uppercase; 
+  font-weight: 300; 
+}
