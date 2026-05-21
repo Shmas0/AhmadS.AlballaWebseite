@@ -18,6 +18,9 @@
   --t-med: 0.8s var(--ease-smooth);
   --t-fast: 0.4s var(--ease-smooth);
 
+  /* SVG Signatur Farbe für den dunklen Modus */
+  --signature-color: #E8E4DC;
+
   /* DAS DUNKLE KUNSTWERK (Permanenter Fluss im Hintergrund) */
   background: linear-gradient(
     135deg, 
@@ -41,6 +44,9 @@ body.light-mode {
   --bg-mid: rgba(255, 255, 255, 0.35);
   --border-soft: rgba(28, 35, 24, 0.1);
   
+  /* SVG Signatur Farbe für den hellen Modus */
+  --signature-color: #3b3b3b;
+  
   /* Das flüssige Kunstwerk aus Bastelfarben */
   background: linear-gradient(
     135deg, 
@@ -62,21 +68,22 @@ body.light-mode {
 }
 
 /* 3D-Glasanpassung speziell für das Licht des Light-Modes (Nicht für die Galerie!) */
+/* LÖSCHE DIESEN BLOCK KOMPLETT ODER ÄNDERE IHN WIE FOLGT: */
+/* ========================================= */
+/* FIX: HÄSSLICHEN KASTEN IM HELLMODUS LÖSCHEN */
+/* ========================================= */
 body.light-mode .main-header,
 body.light-mode .view-section {
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(25px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(25px) !important;
-  
-  border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
-  border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
-  border-right: 1px solid rgba(28, 35, 24, 0.1) !important;
-  border-bottom: 1px solid rgba(28, 35, 24, 0.15) !important;
-  box-shadow: 0 20px 50px rgba(28, 35, 24, 0.05) !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-body.light-mode .about-lead {
-  color: var(--accent-bronze);
+/* Falls der Header im Hellmodus seine Hintergrundfarbe verloren hat, setzen wir sie hier sauber neu: */
+body.light-mode .main-header {
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
 body.light-mode .about-image-wrapper {
@@ -87,9 +94,11 @@ body.light-mode .about-image-wrapper {
 /* GSAP FARBEXPLOSIONS-ELEMENT (NATURAL RIPPLE) */
 /* ============================================ */
 .art-ripple {
+  top: 0; left: 0;
   position: fixed;
   background: radial-gradient(
     circle, 
+    
     rgba(163, 177, 138, 0.95) 0%,   /* Intensives Olivengrün im Kern */
     rgba(209, 215, 196, 0.7) 40%,   /* Sanftes Salbeigrün bricht aus */
     rgba(244, 241, 234, 0) 70%      /* Verläuft weich im Raum */
@@ -117,14 +126,17 @@ html {
 }
 
 body {
-  font-family: var(--font-body);
-  min-height: 100vh;
-  line-height: 1.9;
-  overflow-x: hidden;
-  font-weight: 300;
-  font-size: 18px;
-  background: transparent; 
-  transition: color 0.5s ease;
+    font-family: var(--font-body);
+    min-height: 100vh;
+    line-height: 1.9;
+    overflow-x: hidden;
+    font-weight: 300;
+    font-size: 18px;
+    background: transparent;
+    transition: color 0.5s ease;
+    
+    /* DIE LÖSUNG: Erschafft einen isolierten Raum für den Faden */
+    isolation: isolate; 
 }
 
 ::selection { 
@@ -133,86 +145,14 @@ body {
 }
 
 /* =================================================== */
-/* ATMOSPHERIC BACKGROUND (3D GLASS-BUBBLES IN BACK)  */
+/* DER FADEN - DYNAMISCHE PHYSIK-SIMULATION            */
 /* =================================================== */
-.glow-bg-container { 
-  position: fixed; 
-  inset: 0; 
-  z-index: -1; 
-  pointer-events: none; 
-  overflow: hidden; 
-}
-
-.glow-bg { 
-  position: absolute; 
-  border-radius: 50%; 
-  pointer-events: none; 
-  transition: opacity 0.6s ease;
-  will-change: transform, opacity;
-}
-
-/* BLASEN IM DUNKELMODUS */
-.glow-1 {
-  bottom: -20%; left: 10%; width: 350px; height: 350px;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 40%, rgba(0, 0, 0, 0.4) 80%);
-  box-shadow: 
-    inset -10px -10px 25px rgba(0, 0, 0, 0.6),
-    inset 10px 10px 20px rgba(255, 255, 255, 0.2),
-    0 20px 40px rgba(0, 0, 0, 0.5);
-  animation: floatBubbleUp 28s ease-in-out infinite alternate;
-}
-
-.glow-2 {
-  bottom: -40%; right: 15%; width: 500px; height: 500px;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(0, 0, 0, 0.5) 90%);
-  box-shadow: 
-    inset -15px -15px 35px rgba(0, 0, 0, 0.7),
-    inset 15px 15px 25px rgba(255, 255, 255, 0.15),
-    0 30px 60px rgba(0, 0, 0, 0.6);
-  animation: floatBubbleUp 36s ease-in-out infinite alternate-reverse;
-}
-
-.glow-3 {
-  top: 20%; left: 40%; width: 200px; height: 200px;
-  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.01) 60%, rgba(0, 0, 0, 0.4) 100%);
-  box-shadow: 
-    inset -5px -5px 15px rgba(0, 0, 0, 0.5),
-    inset 5px 5px 12px rgba(255, 255, 255, 0.25),
-    0 15px 30px rgba(0, 0, 0, 0.4);
-  animation: floatBubbleUp 22s ease-in-out infinite alternate;
-  animation-delay: -5s;
-}
-
-.glow-4 {
-  bottom: 10%; right: 45%; width: 150px; height: 150px;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(0, 0, 0, 0.5) 100%);
-  box-shadow: 
-    inset -4px -4px 12px rgba(0, 0, 0, 0.5),
-    inset 4px 4px 10px rgba(255, 255, 255, 0.3),
-    0 10px 20px rgba(0, 0, 0, 0.3);
-  animation: floatBubbleUp 18s ease-in-out infinite alternate;
-  animation-delay: -12s;
-}
-
-@keyframes floatBubbleUp { 
-  0% { transform: translate(0, 100px) scale(0.9); opacity: 0.3; } 
-  50% { opacity: 0.6; }
-  100% { transform: translate(5vw, -150px) scale(1.05); opacity: 0.4; } 
-}
-
-/* BLASEN FÜR DEN HELLMODUS SIND HIER EBENFALLS AKTIV */
-body.light-mode .glow-bg {
-  opacity: 1 !important;
-}
-body.light-mode .glow-1, 
-body.light-mode .glow-2, 
-body.light-mode .glow-3, 
-body.light-mode .glow-4 {
-  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.1) 40%, rgba(28, 35, 24, 0.05) 70%) !important;
-  box-shadow: 
-    inset -8px -8px 20px rgba(28, 35, 24, 0.15),
-    inset 8px 8px 15px rgba(255, 255, 255, 0.8),
-    0 15px 35px rgba(28, 35, 24, 0.06) !important;
+#faden-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1; /* WICHTIG: Er muss unter dem Content liegen */
+  pointer-events: none;
 }
 
 /* ========================================= */
@@ -258,29 +198,33 @@ body.light-mode .glow-4 {
 /* ========================================================= */
 .main-header {
   width: 100%;
-  padding: 20rem 5vw 7rem; 
+  padding: 8rem 5vw 7rem; 
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14rem;
+  gap: 8rem; 
   position: relative;
   z-index: 100;
 
-  backdrop-filter: blur(30px) saturate(130%) !important;
-  -webkit-backdrop-filter: blur(30px) saturate(130%) !important;
-  background: rgba(255, 255, 255, 0.02) !important; 
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(0, 0, 0, 0.15) !important; 
   
-  /* FLÜSSIGE LICHTKANTE: Bricht das Licht edel beim Scrollen */
+  /* KORRIGIERTE KANTEN: Glatte Pixel, gleiche Dicke wie im Hellmodus */
   border-top: 2px solid rgba(255, 255, 255, 0.4) !important;
-  border-left: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-right: 1px solid rgba(0, 0, 0, 0.25) !important;
-  border-bottom: 2.5px solid rgba(0, 0, 0, 0.5) !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.5) !important;
   
-  /* Weicher, raumgreifender Schatten */
   box-shadow: 
     0 30px 70px rgba(5, 8, 1, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
+
+/* ============================================================ */
+/* OPTIMIERTE GLASANPASSUNG: Harmonischer Look im Light Mode   */
+/* ============================================================ */
+
 
 .main-header::after {
   content: '';
@@ -308,7 +252,7 @@ body.light-mode .main-header::after {
 
 .logo-wrapper {
   width: 100%;
-  max-width: 1000px; 
+  max-width: 850px; /*Logo Größe*/
   display: flex;
   justify-content: center;
   align-items: center;
@@ -326,6 +270,29 @@ body.light-mode .main-header::after {
   height: auto; 
   display: block;
   filter: brightness(1.02); 
+}
+
+/* ========================================= */
+/* SVG SIGNATURE ADAPTION                    */
+/* ========================================= */
+.logo svg path,
+.logo svg line,
+.logo svg polyline,
+.logo svg circle,
+.logo svg rect {
+  transition: stroke 0.5s var(--ease-smooth), fill 0.5s var(--ease-smooth);
+}
+
+.logo svg path,
+.logo svg line,
+.logo svg polyline {
+  stroke: var(--signature-color);
+}
+
+.logo svg path:not([fill="none"]),
+.logo svg circle,
+.logo svg rect {
+  fill: var(--signature-color);
 }
 
 .signature-line {
@@ -377,11 +344,23 @@ body.light-mode .main-header::after {
 .nav-link:hover::after { width: 100%; left: 0; opacity: 1; }
 
 /* WECHSEL-BUTTON: DEIN SCHÖNER ORIGINAL-FARBVERLAUF MIT SANFTEM 3D-EFFEKT */
+/* WECHSEL-BUTTON: DEIN SCHÖNER ORIGINAL-FARBVERLAUF MIT SANFTEM 3D-EFFEKT */
 .theme-toggle {
+  /* 1. DAS KORSETT: Betonierte Größe, kein Springen mehr! */
+  min-width: 160px;
+  height: 48px; /* Zwingt den Button auf eine exakte Höhe */
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap; /* Verhindert, dass Text jemals umbricht */
+
   background: linear-gradient(135deg, #A3B18A, #D1D7C4) !important;
-  border: none !important;
+  border: 1px solid transparent !important;
   color: #1C2318 !important;
-  padding: 12px 28px;
+  
+  /* Padding oben/unten entfernen wir, da 'height' und 'align-items' das jetzt übernehmen */
+  padding: 0 28px; 
+  
   border-radius: 40px;
   cursor: pointer;
   letter-spacing: 0.2em;
@@ -389,11 +368,10 @@ body.light-mode .main-header::after {
   font-weight: 600;
   text-transform: uppercase;
   
-  /* Feine, glänzende Lichtkante oben, die den Button konvex hervorhebt */
-  border-top: 1.5px solid rgba(255, 255, 255, 0.6) !important;
-  border-left: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+  /* KORRIGIERTE KANTEN: Glatte Pixel */
+  border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.3) !important;
   
-  /* Eleganter Schatten, der ihn über dem Header schweben lässt */
   box-shadow: 
     0 10px 25px rgba(163, 177, 138, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
@@ -402,41 +380,30 @@ body.light-mode .main-header::after {
   margin-top: 1.5rem;
 }
 
-/* BUTTON HOVER: Drückt sich sanft konkav ein, schimmert aber seidenmatt auf */
 .theme-toggle:hover {
   transform: scale(1.03) translateY(-2px);
   
-  /* Licht bricht sich an den Kanten umgekehrt (konkave Mulde) */
-  border-top: 1.5px solid rgba(0, 0, 0, 0.15) !important;
-  border-left: 1.5px solid rgba(0, 0, 0, 0.1) !important;
-  border-right: 1.5px solid rgba(255, 255, 255, 0.5) !important;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  /* KORRIGIERTE KANTEN */
+  border-top: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-left: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
   
-  /* REPARIERT & UPGRADED: Minimal aufgehellter Originalverlauf für feinen Innenglanz */
   background: linear-gradient(135deg, #b3c29a, #dedfc8) !important;
   
-  /* Edler Innenschatten für perfekte Plastizität */
   box-shadow: 
     0 15px 30px rgba(163, 177, 138, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
     inset 0 -8px 16px rgba(0, 0, 0, 0.03) !important;
 }
 
-/* HELLMODUS ANPASSUNG FÜR HEADER UND BUTTON */
-body.light-mode .main-header {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-top: 2px solid rgba(255, 255, 255, 0.7) !important;
-  border-left: 2px solid rgba(255, 255, 255, 0.5) !important;
-  border-right: 1.5px solid rgba(28, 35, 24, 0.15) !important;
-  border-bottom: 1.5px solid rgba(28, 35, 24, 0.25) !important;
-  box-shadow: 0 20px 50px rgba(28, 35, 24, 0.06) !important;
-}
-
+/* HELLMODUS ANPASSUNG FÜR BUTTON */
 body.light-mode .theme-toggle {
   background: rgba(255, 255, 255, 0.4) !important;
   color: var(--text-primary);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.7) !important;
-  border-left: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+  /* KORRIGIERTE KANTEN */
+  border-top: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.4) !important;
   border-right: 1px solid rgba(28, 35, 24, 0.15) !important;
   border-bottom: 1px solid rgba(28, 35, 24, 0.25) !important;
   box-shadow: 0 8px 20px rgba(28, 35, 24, 0.05) !important;
@@ -444,10 +411,11 @@ body.light-mode .theme-toggle {
 
 body.light-mode .theme-toggle:hover {
   background: rgba(28, 35, 24, 0.05) !important;
+  /* KORRIGIERTE KANTEN */
   border-top: 1px solid rgba(28, 35, 24, 0.2) !important;
   border-left: 1px solid rgba(28, 35, 24, 0.15) !important;
-  border-right: 1.5px solid rgba(255, 255, 255, 0.5) !important;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.7) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.7) !important;
   box-shadow: inset 0 6px 12px rgba(28, 35, 24, 0.08) !important;
 }
 
@@ -460,7 +428,7 @@ body.light-mode .theme-toggle:hover {
   background: linear-gradient(90deg, transparent 0%, rgba(184,151,90,0.35) 30%, rgba(212,180,122,0.55) 50%, rgba(184,151,90,0.35) 70%, transparent 100%);
 }
 
-.hero-section { display: flex; flex-direction: column; align-items: center; gap: 2.5rem; text-align: center; padding: 4rem 0 2rem; }
+.hero-section { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; text-align: center; padding: 1.5rem 0 2rem; }
 .hero-label { display: block; font-family: var(--font-body); font-size: 0.80rem; text-transform: uppercase; letter-spacing: 0.45em; color: var(--accent-bronze); font-weight: 400; opacity: 0.8; }
 .hero-title { 
   font-family: var(--font-display); 
@@ -474,7 +442,7 @@ body.light-mode .theme-toggle:hover {
 }
 .hero-copy { font-family: var(--font-body); font-size: 1.1rem; font-weight: 300; color: var(--text-secondary); letter-spacing: 0.10em; max-width: 480px; line-height: 1.9; }
 
-.content-wrapper { max-width: 1680px; margin: 0 auto; padding: 7rem 5vw 8rem; display: grid; gap: 8rem; position: relative; }
+.content-wrapper { max-width: 1680px; margin: 0 auto; padding: 3.5rem 5vw 8rem; display: grid; gap: 4rem; position: relative; }
 
 /* SECTION HEADERS */
 .portfolio-section { margin-bottom: 0; opacity: 1 !important; transform: translateY(0) !important; }
@@ -728,7 +696,7 @@ body.light-mode .form-group textarea:focus {
 
 .main-footer { 
   text-align: center; 
-  padding: 8rem 2rem 5rem; 
+  padding: 4rem 2rem 5rem; 
   position: relative; 
   
   /* Feine, unaufdringliche Trennlinie nach oben */
@@ -777,4 +745,73 @@ body.light-mode .form-group textarea:focus {
   letter-spacing: 0.25em; 
   text-transform: uppercase; 
   font-weight: 300; 
+}
+/* Sanfter Schatten unter dem Header für einen eleganten Übergang */
+.main-header {   
+    box-shadow: 
+        0 30px 70px rgba(5, 8, 1, 0.35),
+        0 20px 40px rgba(0, 0, 0, 0.2), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+
+body.light-mode .main-header {
+    box-shadow: 0 15px 30px rgba(28, 35, 24, 0.08) !important;
+}
+/* ========================================= */
+/* SANFTER SCHATTEN FÜR DEN FOOTER           */
+/* ========================================= */
+.main-footer {
+    /* Wir fügen den Schatten oben am Footer an, damit er "schwebt" */
+    box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.1) !important;
+    
+    /* Falls es durch die Hintergründe zu Überschneidungen kommt: */
+    position: relative;
+    z-index: 10;
+}
+
+/* Anpassung für den Light-Mode, damit es dort weicher bleibt */
+body.light-mode .main-footer {
+    box-shadow: 0 -15px 30px rgba(28, 35, 24, 0.05) !important;
+}
+/* ========================================= */
+/* KORREKTUR: Header-Kante nach oben schieben */
+/* ========================================= */
+.main-header {
+    margin-top: -5px; /* Schiebt den Header um 5px nach oben */
+    transform: translateY(-5px); /* Alternative: Zwingt ihn visuell nach oben */
+}
+/* ========================================= */
+/* GLÄTTUNGS-BLUR FÜR DEN ANIMIERTEN HINTERGRUND */
+/* ========================================= */
+
+/* Wir brauchen ein Element, das über dem Gradienten liegt */
+.bg-blur-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1; /* Liegt über dem Gradienten, aber unter dem Inhalt */
+    
+    /* Der Blur-Effekt */
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
+    
+    /* WICHTIG: Damit der Filter greift, muss er auf einem Element liegen, 
+       das den Gradienten "sieht" oder selbst transparent ist. */
+    pointer-events: none;
+}
+
+/* Optional: Wenn du das Banding noch stärker bekämpfen willst */
+#faden-canvas {
+    z-index: 1; /* Faden liegt über dem Blur */
+}
+/* Erstelle einen Container, der nur den Hintergrund hält */
+.bg-container {
+    position: fixed;
+    top: -50px; left: -50px; /* Offset zum Ausgleich des Blurs */
+    width: calc(100% + 100px); 
+    height: calc(100% + 100px);
+    z-index: -2;
+    background: inherit; /* Nimmt den Gradienten vom body oder root */
+    filter: blur(40px); /* Hier wird weichgezeichnet */
 }
