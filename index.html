@@ -15,12 +15,7 @@
 </head>
 <body class="page-reveal">
 
-<div class="glow-bg-container" aria-hidden="true">
-<div class="glow-bg glow-1"></div>
-<div class="glow-bg glow-2"></div>
-<div class="glow-bg glow-3"></div>
-<div class="glow-bg glow-4"></div>
-</div>
+<canvas id="faden-canvas" aria-hidden="true"></canvas>
 
 <header class="main-header">
        
@@ -394,7 +389,7 @@ C1083.601,360.975 1083.575,361.077 1084.000,362.1000 C1083.667,362.1000 1083.333
 <section id="portfolio-categories" class="portfolio-section">
 <header class="section-header">
 <div class="section-title-group">
-<span class="section-number">01</span>
+<span class="section-number"></span>
 <h2 class="section-title">Portfolio Kategorien</h2>
 </div>
 </header>
@@ -559,6 +554,7 @@ class AnimationController {
     }
 
     init() {
+        this.initFaden();
         this.initLogoAnimation();
         this.initScrollReveal();
         this.initHoverEffects();
@@ -572,28 +568,225 @@ class AnimationController {
         if (!this.signaturePath) return;
 
         const pathLength = this.signaturePath.getTotalLength();
+  
         gsap.set(this.signaturePath, {
             strokeDasharray: pathLength,
             strokeDashoffset: pathLength,
-            stroke: '#FAF9F6',
-            fill: 'transparent',
-            opacity: 1
+            stroke: 'var(--signature-color)',
+            fill: 'var(--signature-color)',
+            strokeOpacity: 1, 
+            fillOpacity: 0,
+            opacity: 1,
+            /* KORREKTUR: Startwert mit exakter Farbe, aber 0% Deckkraft */
+            filter: 'drop-shadow(0px 0px 0px rgba(212, 180, 122, 0))' 
         });
-        
+
         gsap.timeline()
-            .to(this.signaturePath, {
-                strokeDashoffset: 0,
-                duration: 5.2,
-                ease: 'power2.inOut',
-                delay: 0.4
-            }, 0)
-            .to(this.signaturePath, {
-                fill: '#FAF9F6',
-                stroke: 'transparent',
-                duration: 0.8,
-                ease: 'power2.out'
-            }, '2.9');
+        .to(this.signaturePath, {
+            strokeDashoffset: 0,
+            duration: 5.2,
+            ease: 'power2.inOut',
+            delay: 0.4
+        }, 0)
+        .to(this.signaturePath, {
+            fillOpacity: 1,
+            strokeOpacity: 0,
+            duration: 0.8,
+            ease: 'power2.out'
+        }, '2.9')
+        /* --- AURA / GLOW EFFEKT --- */
+        .to(this.signaturePath, {
+            /* Leuchtet in weichem Gold/Bronze auf */
+            filter: 'drop-shadow(0px 0px 20px rgba(212, 180, 122, 0.8))',
+            duration: 0.6,
+            ease: 'power2.out'
+        }, '3.1') 
+        .to(this.signaturePath, {
+            /* Dimmt exakt diese Farbe wieder sanft auf 0 aus */
+            filter: 'drop-shadow(0px 0px 0px rgba(212, 180, 122, 0))',
+            duration: 1.5,
+            ease: 'power2.inOut'
+        }, '>');
     }
+
+initFaden() {
+        const canvas = document.getElementById('faden-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let width, height, targetY;
+        let lastScrollY = window.scrollY;
+        
+        let startX, currentX, currentY;
+        let velocityX = 0;
+        let velocityY = 0;
+        let time = 0; 
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let isDragging = false;
+
+        const tensionX = 0.015; 
+        const tensionY = 0.01;  
+        const friction = 0.92;  
+
+        const resize = () => {
+            width = window.innerWidth;
+            height = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.height = height + 'px';
+            startX = width * 0.08;
+            currentX = startX;
+            
+            // Berechnet exakt den Anfang des Footers
+            const footer = document.querySelector('footer'); 
+            let footerHeight = footer ? footer.offsetHeight : 100; 
+            
+            // Der Faden endet genau an der oberen Kante des Footers
+            targetY = height - footerHeight; 
+            currentY = targetY;
+        };
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('load', resize); 
+        resize();
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        window.addEventListener('mousedown', () => {
+            let absoluteMouseY = mouseY + window.scrollY;
+            let dist = Math.hypot(mouseX - currentX, absoluteMouseY - currentY);
+            if (dist < 80) {
+                isDragging = true;
+                document.body.style.cursor = 'grabbing';
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        const draw = () => {
+            let currentScrollY = window.scrollY;
+            let delta = currentScrollY - lastScrollY;
+            lastScrollY = currentScrollY;
+            time += 0.02; 
+
+            let absoluteMouseY = mouseY + currentScrollY;
+
+            if (!isDragging) {
+                let dist = Math.hypot(mouseX - currentX, absoluteMouseY - currentY);
+                if (dist < 80) {
+                    document.body.style.cursor = 'grab';
+                } else {
+                    document.body.style.cursor = 'default';
+                }
+            }
+
+            if (isDragging) {
+                velocityX += (mouseX - currentX) * 0.15; 
+                velocityY += (absoluteMouseY - currentY) * 0.15;
+            } else {
+                velocityX += delta * 0.04; 
+                velocityY -= delta * 0.04; 
+                
+                velocityX += (startX - currentX) * tensionX;
+                velocityY += (targetY - currentY) * tensionY;
+            }
+            
+            velocityX *= friction;
+            velocityY *= friction;
+            
+            currentX += velocityX;
+            currentY += velocityY;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Robuste Erkennung für den Hellmodus
+            let isLightMode = document.body.classList.contains('light-mode') || 
+                              document.body.classList.contains('light') || 
+                              document.body.classList.contains('light-theme') ||
+                              document.documentElement.getAttribute('data-theme') === 'light' ||
+                              document.documentElement.classList.contains('light-mode');
+            
+            let stretch = Math.hypot(currentX - startX, currentY - targetY);
+            let splitFactor = Math.min(stretch * 0.1, 12);
+
+            ctx.lineCap = 'round';
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+
+            // Kontraste für beide Modi
+            if (isLightMode) {
+                ctx.strokeStyle = 'rgba(28, 35, 24, 0.85)'; 
+                ctx.lineWidth = 2; 
+                ctx.fillStyle = '#1C2318'; 
+            } else {
+                ctx.strokeStyle = 'rgba(184, 151, 90, 0.45)'; 
+                ctx.lineWidth = 1.5;
+                ctx.fillStyle = '#B8975A'; 
+            }
+
+            let cpY = currentY * 0.5; 
+
+            // 1. DEN FADEN ZEICHNEN
+            if (splitFactor < 0.5 && !isDragging) {
+                ctx.beginPath();
+                ctx.moveTo(startX, 0);
+                ctx.quadraticCurveTo(startX, cpY, currentX, currentY);
+                ctx.stroke();
+            } else {
+                let steps = 80; 
+                ctx.beginPath();
+                for (let i = 0; i <= steps; i++) {
+                    let t = i / steps;
+                    let xBase = startX * (1 - t * t) + currentX * (t * t);
+                    let yBase = (2 * (1 - t) * t * cpY) + (t * t * currentY);
+                    
+                    let melt = Math.sin(t * Math.PI); 
+                    let offset = Math.sin(t * 18 - time) * splitFactor * melt;
+                    if (i === 0) ctx.moveTo(xBase + offset, yBase);
+                    else ctx.lineTo(xBase + offset, yBase);
+                }
+                ctx.stroke();
+
+                ctx.beginPath();
+                for (let i = 0; i <= steps; i++) {
+                    let t = i / steps;
+                    let xBase = startX * (1 - t * t) + currentX * (t * t);
+                    let yBase = (2 * (1 - t) * t * cpY) + (t * t * currentY);
+                    
+                    let melt = Math.sin(t * Math.PI); 
+                    let offset = Math.sin(t * 18 - time + Math.PI) * splitFactor * melt;
+                    if (i === 0) ctx.moveTo(xBase + offset, yBase);
+                    else ctx.lineTo(xBase + offset, yBase);
+                }
+                ctx.stroke();
+            }
+
+            // 2. DAS MAGRITTE-GEWICHT (Abstrakte Melone)
+            let hatWidth = 18;
+            let hatHeight = 8;
+            
+            ctx.beginPath();
+            ctx.moveTo(currentX - hatWidth, currentY);
+            ctx.lineTo(currentX + hatWidth, currentY);
+            ctx.quadraticCurveTo(currentX + hatWidth/2, currentY - hatHeight * 2, currentX - hatWidth/2, currentY - hatHeight * 2);
+            ctx.closePath();
+            ctx.fill();
+
+            requestAnimationFrame(draw);
+        };
+        draw();
+    }
+    
 
     initScrollReveal() {
         this.scrollRevealElements.forEach((el, index) => {
@@ -787,66 +980,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (themeBtn) {
         themeBtn.addEventListener('click', function(e) {
-    // 1. Erstelle das Explosionselement
-    const ripple = document.createElement('div');
-    ripple.classList.add('art-ripple');
-    
-    // 2. DYNAMISCHE FARBE: Wenn Lightmode aktiv ist, explodiert dunkles Gold. Wenn nicht, Salbeigrün!
-    if(document.body.classList.contains('light-mode')) {
-        // Welle zurück zu Dunkel: Glühendes Bronze/Gold
-        ripple.style.background = `radial-gradient(circle, rgba(184, 151, 90, 0.95) 0%, rgba(212, 180, 122, 0.6) 40%, rgba(0,0,0,0) 70%)`;
-    } else {
-        // Welle hin zu Hell: Frisches Salbei/Olive
-        ripple.style.background = `radial-gradient(circle, rgba(163, 177, 138, 0.95) 0%, rgba(209, 215, 196, 0.7) 40%, rgba(255,255,255,0) 70%)`;
-    }
-    
-    // 3. Positionieren und abfeuern
-    ripple.style.left = `${e.clientX}px`;
-    ripple.style.top = `${e.clientY}px`;
-    document.body.appendChild(ripple);
-    
-    gsap.fromTo(ripple, 
-        { width: 0, height: 0, opacity: 1 },
-        { 
-            width: '250vmax', 
-            height: '250vmax', 
-            opacity: 0, 
-            duration: 1.3, 
-            ease: 'power2.out',
-            onComplete: () => ripple.remove()
-        }
-    );
+            // 1. Erstelle das Explosionselement
+            const ripple = document.createElement('div');
+            ripple.classList.add('art-ripple');
+            
+            // 2. DYNAMISCHE FARBE: Wenn Lightmode aktiv ist, explodiert dunkles Gold. Wenn nicht, Salbeigrün!
+            if(document.body.classList.contains('light-mode')) {
+                // Welle zurück zu Dunkel: Glühendes Bronze/Gold
+                ripple.style.background = `radial-gradient(circle, rgba(184, 151, 90, 0.95) 0%, rgba(212, 180, 122, 0.6) 40%, rgba(0,0,0,0) 70%)`;
+            } else {
+                // Welle hin zu Hell: Frisches Salbei/Olive
+                ripple.style.background = `radial-gradient(circle, rgba(163, 177, 138, 0.95) 0%, rgba(209, 215, 196, 0.7) 40%, rgba(255,255,255,0) 70%)`;
+            }
+            
+            // 3. Positionieren und abfeuern
+            ripple.style.left = `${e.clientX}px`;
+            ripple.style.top = `${e.clientY}px`;
+            document.body.appendChild(ripple);
+            
+            gsap.fromTo(ripple, 
+                { width: 0, height: 0, opacity: 1 },
+                { 
+                    width: '250vmax', 
+                    height: '250vmax', 
+                    opacity: 0, 
+                    duration: 1.3, 
+                    ease: 'power2.out',
+                    onComplete: () => ripple.remove()
+                }
+            );
 
-    // 4. Klassen-Wechsel
-    setTimeout(() => {
-        document.body.classList.toggle('light-mode');
-        
-        if(document.body.classList.contains('light-mode')) {
-            themeBtn.textContent = 'Dark Mode';
-            localStorage.setItem('theme', 'light');
-        } else {
-            themeBtn.textContent = 'Light Mode';
-            localStorage.setItem('theme', 'dark');
-        }
-    }, 150);
-});
+            // 4. Klassen-Wechsel
+            setTimeout(() => {
+                document.body.classList.toggle('light-mode');
+                
+                if(document.body.classList.contains('light-mode')) {
+                    themeBtn.textContent = 'Dark Mode';
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    themeBtn.textContent = 'Light Mode';
+                    localStorage.setItem('theme', 'dark');
+                }
+            }, 150);
+        });
     }
 });
 </script>
 
 <div id="image-modal" class="modal" aria-hidden="true">
-<span class="close-modal" aria-label="Schließen">&times;</span>
-<div class="modal-content">
-<img id="modal-image" src="" alt="Großansicht">
-<div id="modal-caption"></div>
+    <span class="close-modal" aria-label="Schließen">&times;</span>
+    <div class="modal-content">
+        <img id="modal-image" src="" alt="Großansicht">
+        <div id="modal-caption"></div>
+    </div>
 </div>
-</div>
+
 <footer class="main-footer">
-  <div class="footer-content">
-    <div class="footer-line"></div>
-    <p class="footer-credits">Erstellt von Ahmad S. Alballa</p>
-    <p class="footer-copyright">&copy; 2026 Alle Rechte vorbehalten.</p>
-  </div>
+    <div class="footer-content">
+        <div class="footer-line"></div>
+        <p class="footer-credits">Erstellt von Ahmad S. Alballa</p>
+        <p class="footer-copyright">&copy; 2026 Alle Rechte vorbehalten.</p>
+    </div>
 </footer>
 </body>
 </html>
